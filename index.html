@@ -18,6 +18,7 @@
     }
     * { box-sizing: border-box; }
     body { margin: 0; font-family: system-ui, Arial, sans-serif; color: var(--text); background: var(--bg); }
+    body.locked { overflow: hidden; }
     header { background: var(--green); color: white; padding: 18px 5%; }
     .brand { font-size: 21px; font-weight: 850; letter-spacing: -.5px; }
     .brand span { color: var(--gold); }
@@ -36,16 +37,34 @@
     select { width: 100%; padding: 12px; border: 1px solid #d9e2dc; border-radius: 10px; background: white; color: var(--text); font-size: 14px; }
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 235px), 1fr)); gap: 15px; }
     .document { background: white; border: 1px solid #e5ebe6; border-radius: 15px; padding: 18px; box-shadow: 0 3px 12px #183a2410; }
-    .doc-icon { display: grid; place-items: center; width: 48px; height: 52px; border-radius: 12px; background: #e5f2e9; font-size: 25px; margin-bottom: 14px; }
+    .cover { position: relative; width: 100%; aspect-ratio: 3 / 4; max-height: 340px; background: #e5f2e9; border-radius: 12px; overflow: hidden; display: grid; place-items: center; margin-bottom: 14px; cursor: pointer; border: 1px solid #dbe8df; }
+    .cover img { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; }
+    .cover .ph { font-size: 44px; }
     .document h3 { margin: 0 0 8px; font-size: 17px; overflow-wrap: anywhere; }
     .meta { color: var(--muted); font-size: 13px; line-height: 1.8; }
     .description { color: #47574e; font-size: 14px; line-height: 1.5; margin: 10px 0 16px; }
-    .download { display: block; text-align: center; text-decoration: none; background: var(--green2); color: white; border-radius: 9px; padding: 12px; font-weight: 700; font-size: 14px; }
+    .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .btn { display: block; text-align: center; text-decoration: none; border: 0; cursor: pointer; font-family: inherit; border-radius: 9px; padding: 12px 8px; font-weight: 700; font-size: 14px; }
+    .btn-preview { background: #e5f2e9; color: var(--green); }
+    .download { background: var(--green2); color: white; }
     .download:hover { background: var(--green); }
     .empty { text-align: center; padding: 35px 15px; color: var(--muted); background: white; border-radius: 14px; grid-column: 1 / -1; }
     .empty strong { display: block; color: var(--text); margin-bottom: 7px; }
     .notice { margin-top: 24px; padding: 15px; background: #fff7df; border-radius: 12px; color: #65521e; font-size: 13px; line-height: 1.6; }
     footer { background: var(--green); color: #d6e5dd; text-align: center; padding: 24px 5%; font-size: 13px; line-height: 1.8; }
+
+    .viewer { position: fixed; inset: 0; z-index: 100; background: #1b1f1d; display: none; flex-direction: column; }
+    .viewer.open { display: flex; }
+    .viewer-bar { display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: var(--green); color: white; }
+    .viewer-title { flex: 1; min-width: 0; font-weight: 700; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .viewer-bar .btn { padding: 9px 12px; font-size: 13px; }
+    .btn-close { background: #ffffff22; color: white; }
+    .viewer-info { font-size: 12px; color: #d6e5dd; padding: 6px 12px; background: #0f2f27; }
+    .viewer-body { flex: 1; overflow-y: auto; padding: 10px; -webkit-overflow-scrolling: touch; }
+    .page { background: white; margin: 0 auto 10px; width: 100%; max-width: 900px; position: relative; }
+    .page canvas { width: 100%; height: 100%; display: block; }
+    .page .loading { position: absolute; inset: 0; display: grid; place-items: center; color: var(--muted); font-size: 13px; }
+
     @media (min-width: 650px) {
       .filters { grid-template-columns: repeat(3, 1fr); }
       .hero { padding-top: 52px; padding-bottom: 55px; }
@@ -93,6 +112,17 @@
     © <span id="currentYear"></span> — Tous droits réservés.
   </footer>
 
+  <div id="viewer" class="viewer" aria-hidden="true">
+    <div class="viewer-bar">
+      <div id="viewerTitle" class="viewer-title"></div>
+      <a id="viewerDownload" class="btn download" target="_blank" rel="noopener">Télécharger</a>
+      <button id="viewerClose" class="btn btn-close" type="button">✕ Fermer</button>
+    </div>
+    <div id="viewerInfo" class="viewer-info"></div>
+    <div id="viewerBody" class="viewer-body"></div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script>
     // ====== À REMPLIR ======
     const SUPABASE_URL = "https://wxmmjkldpxjtwwpaasbg.supabase.co";
@@ -100,7 +130,14 @@
     const BUCKET = "annales-pdf";
     // =======================
 
+    if (window.pdfjsLib) {
+      pdfjsLib.GlobalWorkerOptions.workerSrc =
+        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+    }
+
     let documents = [];
+    const pdfCache = new Map();
+    const coverCache = new Map();
 
     const search = document.getElementById("search");
     const subject = document.getElementById("subject");
@@ -108,6 +145,12 @@
     const year = document.getElementById("year");
     const results = document.getElementById("results");
     const count = document.getElementById("count");
+    const viewer = document.getElementById("viewer");
+    const viewerTitle = document.getElementById("viewerTitle");
+    const viewerDownload = document.getElementById("viewerDownload");
+    const viewerClose = document.getElementById("viewerClose");
+    const viewerInfo = document.getElementById("viewerInfo");
+    const viewerBody = document.getElementById("viewerBody");
 
     const normalize = value => String(value ?? "")
       .normalize("NFD")
@@ -121,6 +164,149 @@
       return SUPABASE_URL + "/storage/v1/object/public/" + BUCKET + "/" + encoded;
     }
 
+    // Lien de téléchargement avec un vrai nom : « Titre.pdf »
+    function downloadUrl(url, titre) {
+      if (!url) return "";
+      const name = String(titre || "document")
+        .replace(/[\\/:*?"<>|]+/g, " ")
+        .replace(/\s+/g, " ")
+        .trim() || "document";
+      return url + "?download=" + encodeURIComponent(name + ".pdf");
+    }
+
+    function getPdf(url) {
+      if (!pdfCache.has(url)) {
+        pdfCache.set(url, pdfjsLib.getDocument({ url }).promise);
+      }
+      return pdfCache.get(url);
+    }
+
+    /* ---------- Couvertures (page 1 du PDF) ---------- */
+    async function makeCover(url) {
+      if (coverCache.has(url)) return coverCache.get(url);
+      const pdf = await getPdf(url);
+      const page = await pdf.getPage(1);
+      const base = page.getViewport({ scale: 1 });
+      const viewport = page.getViewport({ scale: 420 / base.width });
+      const canvas = document.createElement("canvas");
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+      await page.render({ canvasContext: canvas.getContext("2d"), viewport }).promise;
+      const dataUrl = canvas.toDataURL("image/jpeg", 0.82);
+      coverCache.set(url, dataUrl);
+      return dataUrl;
+    }
+
+    const coverObserver = "IntersectionObserver" in window
+      ? new IntersectionObserver(entries => {
+          entries.forEach(entry => {
+            if (!entry.isIntersecting) return;
+            coverObserver.unobserve(entry.target);
+            loadCover(entry.target);
+          });
+        }, { rootMargin: "300px" })
+      : null;
+
+    async function loadCover(box) {
+      const url = box.dataset.url;
+      if (!url || !window.pdfjsLib) return;
+      try {
+        const src = await makeCover(url);
+        const img = document.createElement("img");
+        img.alt = "Couverture";
+        img.src = src;
+        box.replaceChildren(img);
+      } catch (error) {
+        console.warn("Couverture indisponible", error);
+      }
+    }
+
+    /* ---------- Aperçu plein écran ---------- */
+    let pageObserver = null;
+    let viewerOpen = false;
+
+    async function openViewer(doc) {
+      if (!window.pdfjsLib) { window.open(doc.url, "_blank", "noopener"); return; }
+      viewerOpen = true;
+      document.body.classList.add("locked");
+      viewer.classList.add("open");
+      viewer.setAttribute("aria-hidden", "false");
+      viewerTitle.textContent = doc.titre;
+      viewerDownload.href = doc.downloadUrl;
+      viewerInfo.textContent = "Chargement de l’aperçu…";
+      viewerBody.replaceChildren();
+      history.pushState({ viewer: true }, "");
+
+      try {
+        const pdf = await getPdf(doc.url);
+        const first = await pdf.getPage(1);
+        const base = first.getViewport({ scale: 1 });
+        const ratio = base.height / base.width;
+        viewerInfo.textContent = pdf.numPages + (pdf.numPages > 1 ? " pages" : " page") + " · fais défiler pour lire";
+
+        if (pageObserver) pageObserver.disconnect();
+        pageObserver = new IntersectionObserver(entries => {
+          entries.forEach(entry => {
+            if (!entry.isIntersecting) return;
+            pageObserver.unobserve(entry.target);
+            renderPage(pdf, entry.target);
+          });
+        }, { root: viewerBody, rootMargin: "800px 0px" });
+
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const holder = document.createElement("div");
+          holder.className = "page";
+          holder.dataset.page = i;
+          holder.style.aspectRatio = "1 / " + ratio;
+          const loading = document.createElement("div");
+          loading.className = "loading";
+          loading.textContent = "Page " + i;
+          holder.appendChild(loading);
+          viewerBody.appendChild(holder);
+          pageObserver.observe(holder);
+        }
+      } catch (error) {
+        console.error(error);
+        viewerInfo.textContent = "Aperçu impossible. Utilise le bouton Télécharger.";
+      }
+    }
+
+    async function renderPage(pdf, holder) {
+      try {
+        const page = await pdf.getPage(Number(holder.dataset.page));
+        const base = page.getViewport({ scale: 1 });
+        const cssWidth = Math.min(holder.clientWidth || 800, 900);
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        const viewport = page.getViewport({ scale: (cssWidth * dpr) / base.width });
+        const canvas = document.createElement("canvas");
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        await page.render({ canvasContext: canvas.getContext("2d"), viewport }).promise;
+        holder.style.aspectRatio = canvas.width + " / " + canvas.height;
+        holder.replaceChildren(canvas);
+      } catch (error) {
+        console.warn("Page non affichée", error);
+      }
+    }
+
+    function closeViewer() {
+      if (!viewerOpen) return;
+      viewerOpen = false;
+      if (pageObserver) pageObserver.disconnect();
+      viewer.classList.remove("open");
+      viewer.setAttribute("aria-hidden", "true");
+      document.body.classList.remove("locked");
+      viewerBody.replaceChildren();
+    }
+
+    viewerClose.addEventListener("click", () => {
+      if (history.state && history.state.viewer) history.back();
+      else closeViewer();
+    });
+    window.addEventListener("popstate", closeViewer);
+    document.addEventListener("keydown", e => { if (e.key === "Escape") viewerClose.click(); });
+
+    /* ---------- Données ---------- */
     async function loadDocuments() {
       try {
         const response = await fetch(
@@ -137,7 +323,8 @@
           serie: row.serie,
           annee: row.annee,
           description: row.description,
-          url: pdfUrl(row.fichier_path)
+          url: pdfUrl(row.fichier_path),
+          downloadUrl: downloadUrl(pdfUrl(row.fichier_path), row.titre)
         }));
         fillFilter(subject, documents.map(d => d.matiere));
         fillFilter(series, documents.map(d => d.serie));
@@ -198,9 +385,18 @@
         const card = document.createElement("article");
         card.className = "document";
 
-        const icon = document.createElement("div");
-        icon.className = "doc-icon";
-        icon.textContent = "📘";
+        const cover = document.createElement("div");
+        cover.className = "cover";
+        cover.dataset.url = doc.url;
+        const placeholder = document.createElement("div");
+        placeholder.className = "ph";
+        placeholder.textContent = "📘";
+        cover.appendChild(placeholder);
+        if (doc.url) {
+          cover.addEventListener("click", () => openViewer(doc));
+          if (coverObserver) coverObserver.observe(cover);
+          else loadCover(cover);
+        }
 
         const title = document.createElement("h3");
         title.textContent = doc.titre;
@@ -213,16 +409,27 @@
         description.className = "description";
         description.textContent = doc.description || "Document de révision.";
 
-        card.append(icon, title, meta, description);
+        card.append(cover, title, meta, description);
 
         if (doc.url) {
+          const actions = document.createElement("div");
+          actions.className = "actions";
+
+          const preview = document.createElement("button");
+          preview.type = "button";
+          preview.className = "btn btn-preview";
+          preview.textContent = "👁 Aperçu";
+          preview.addEventListener("click", () => openViewer(doc));
+
           const link = document.createElement("a");
-          link.className = "download";
-          link.href = doc.url;
-          link.textContent = "Télécharger le PDF";
+          link.className = "btn download";
+          link.href = doc.downloadUrl;
+          link.textContent = "Télécharger";
           link.target = "_blank";
           link.rel = "noopener";
-          card.appendChild(link);
+
+          actions.append(preview, link);
+          card.appendChild(actions);
         }
 
         results.appendChild(card);
@@ -240,3 +447,4 @@
   </script>
 </body>
 </html>
+ 
