@@ -1,0 +1,410 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#123c32">
+  <meta name="description" content="Retrouve les annales et livres pour préparer le BAC 2 au Togo.">
+  <title>Annales BAC 2 - TG</title>
+  <style>
+    :root {
+      --green: #123c32;
+      --green2: #176b50;
+      --gold: #f4c95d;
+      --bg: #f4f7f5;
+      --text: #172720;
+      --muted: #65736c;
+      --white: #fff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: system-ui, Arial, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    header {
+      background: var(--green);
+      color: white;
+      padding: 18px 5%;
+    }
+
+    .brand {
+      font-size: 21px;
+      font-weight: 850;
+      letter-spacing: -.5px;
+    }
+
+    .brand span { color: var(--gold); }
+
+    .tagline {
+      margin-top: 5px;
+      color: #d6e5dd;
+      font-size: 13px;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, #123c32, #176b50);
+      color: white;
+      padding: 35px 5% 42px;
+    }
+
+    .hero h1 {
+      margin: 0 0 12px;
+      font-size: clamp(27px, 7vw, 42px);
+      line-height: 1.15;
+    }
+
+    .hero p {
+      margin: 0 0 22px;
+      color: #e1eee7;
+      line-height: 1.6;
+    }
+
+    .search-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: white;
+      border-radius: 14px;
+      padding: 0 15px;
+      max-width: 650px;
+      box-shadow: 0 8px 25px #001a1025;
+    }
+
+    .search-wrap span { font-size: 21px; }
+
+    #search {
+      border: 0;
+      outline: 0;
+      width: 100%;
+      min-width: 0;
+      padding: 17px 0;
+      font-size: 16px;
+      color: var(--text);
+      background: transparent;
+    }
+
+    main {
+      width: min(1100px, 92%);
+      margin: 28px auto 50px;
+    }
+
+    .section-head {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    h2 { margin: 0; font-size: 22px; }
+
+    #count {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .filters {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 22px;
+    }
+
+    select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #d9e2dc;
+      border-radius: 10px;
+      background: white;
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 235px), 1fr));
+      gap: 15px;
+    }
+
+    .document {
+      background: white;
+      border: 1px solid #e5ebe6;
+      border-radius: 15px;
+      padding: 18px;
+      box-shadow: 0 3px 12px #183a2410;
+    }
+
+    .doc-icon {
+      display: grid;
+      place-items: center;
+      width: 48px;
+      height: 52px;
+      border-radius: 12px;
+      background: #e5f2e9;
+      font-size: 25px;
+      margin-bottom: 14px;
+    }
+
+    .document h3 {
+      margin: 0 0 8px;
+      font-size: 17px;
+      overflow-wrap: anywhere;
+    }
+
+    .meta {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.8;
+    }
+
+    .description {
+      color: #47574e;
+      font-size: 14px;
+      line-height: 1.5;
+      margin: 10px 0 16px;
+    }
+
+    .download {
+      display: block;
+      text-align: center;
+      text-decoration: none;
+      background: var(--green2);
+      color: white;
+      border-radius: 9px;
+      padding: 12px;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .download:hover { background: var(--green); }
+
+    .empty {
+      text-align: center;
+      padding: 35px 15px;
+      color: var(--muted);
+      background: white;
+      border-radius: 14px;
+      grid-column: 1 / -1;
+    }
+
+    .empty strong {
+      display: block;
+      color: var(--text);
+      margin-bottom: 7px;
+    }
+
+    .notice {
+      margin-top: 24px;
+      padding: 15px;
+      background: #fff7df;
+      border-radius: 12px;
+      color: #65521e;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    footer {
+      background: var(--green);
+      color: #d6e5dd;
+      text-align: center;
+      padding: 24px 5%;
+      font-size: 13px;
+      line-height: 1.8;
+    }
+
+    @media (min-width: 650px) {
+      .filters { grid-template-columns: repeat(3, 1fr); }
+      .hero { padding-top: 52px; padding-bottom: 55px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">ANNALES <span>BAC 2 - TG</span></div>
+    <div class="tagline">Ta bibliothèque pour réussir le BAC 2 au Togo</div>
+  </header>
+
+  <section class="hero">
+    <h1>Révise mieux.<br>Réussis ton BAC.</h1>
+    <p>Retrouve tes annales, exercices et livres scolaires au même endroit.</p>
+    <label class="search-wrap">
+      <span>🔎</span>
+      <input id="search" type="search"
+        placeholder="Ex. : HKA, physique, maths, 2024..."
+        autocomplete="off">
+    </label>
+  </section>
+
+  <main>
+    <div class="section-head">
+      <h2>Bibliothèque</h2>
+      <span id="count">Chargement…</span>
+    </div>
+
+    <div class="filters">
+      <select id="subject">
+        <option value="">Toutes les matières</option>
+      </select>
+      <select id="series">
+        <option value="">Toutes les séries</option>
+      </select>
+      <select id="year">
+        <option value="">Toutes les années</option>
+      </select>
+    </div>
+
+    <div id="results" class="grid"></div>
+
+    <div class="notice">
+      📚 Les documents disponibles seront ajoutés progressivement.
+      Reviens régulièrement pour découvrir les nouvelles annales.
+    </div>
+  </main>
+
+  <footer>
+    <strong>ANNALES BAC 2 - TG</strong><br>
+    Un outil de révision pour les élèves du Togo.<br>
+    © <span id="currentYear"></span> — Tous droits réservés.
+  </footer>
+
+  <script>
+    /*
+      Démonstration : ces exemples ne sont pas de vrais PDF.
+      Ils servent uniquement à tester la recherche.
+      Ils seront remplacés par les documents publiés dans Supabase.
+    */
+    const documents = [
+      {
+        titre: "HKA - Physique",
+        matiere: "Physique",
+        serie: "D",
+        annee: 2024,
+        description: "Exemple de résultat pour tester la recherche.",
+        url: ""
+      },
+      {
+        titre: "Annales de mathématiques",
+        matiere: "Mathématiques",
+        serie: "C",
+        annee: 2023,
+        description: "Exemple de résultat pour tester les filtres.",
+        url: ""
+      }
+    ];
+
+    const search = document.getElementById("search");
+    const subject = document.getElementById("subject");
+    const series = document.getElementById("series");
+    const year = document.getElementById("year");
+    const results = document.getElementById("results");
+    const count = document.getElementById("count");
+
+    const normalize = value => String(value ?? "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .trim();
+
+    function fillFilter(element, values, label) {
+      [...new Set(values)].sort().forEach(value => {
+        const option = document.createElement("option");
+        option.value = value;
+        option.textContent = label ? label(value) : value;
+        element.appendChild(option);
+      });
+    }
+
+    fillFilter(subject, documents.map(d => d.matiere));
+    fillFilter(series, documents.map(d => d.serie));
+    fillFilter(year, documents.map(d => d.annee));
+
+    function render() {
+      const query = normalize(search.value);
+      const filtered = documents.filter(doc => {
+        const text = normalize([
+          doc.titre, doc.matiere, doc.serie,
+          doc.annee, doc.description
+        ].join(" "));
+        return (!query || text.includes(query)) &&
+          (!subject.value || doc.matiere === subject.value) &&
+          (!series.value || doc.serie === series.value) &&
+          (!year.value || String(doc.annee) === year.value);
+      });
+
+      count.textContent = filtered.length +
+        (filtered.length > 1 ? " résultats" : " résultat");
+
+      results.replaceChildren();
+
+      if (!filtered.length) {
+        const empty = document.createElement("div");
+        empty.className = "empty";
+        const strong = document.createElement("strong");
+        strong.textContent = "Aucun document trouvé";
+        const message = document.createElement("span");
+        message.textContent = "Essaie un autre mot ou retire un filtre.";
+        empty.append(strong, message);
+        results.appendChild(empty);
+        return;
+      }
+
+      filtered.forEach(doc => {
+        const card = document.createElement("article");
+        card.className = "document";
+
+        const icon = document.createElement("div");
+        icon.className = "doc-icon";
+        icon.textContent = "📘";
+
+        const title = document.createElement("h3");
+        title.textContent = doc.titre;
+
+        const meta = document.createElement("div");
+        meta.className = "meta";
+        meta.textContent = doc.matiere + " · Série " +
+          doc.serie + " · " + doc.annee;
+
+        const description = document.createElement("p");
+        description.className = "description";
+        description.textContent = doc.description || "Document de révision.";
+
+        card.append(icon, title, meta, description);
+
+        if (doc.url) {
+          const link = document.createElement("a");
+          link.className = "download";
+          link.href = doc.url;
+          link.textContent = "Télécharger le PDF";
+          link.target = "_blank";
+          link.rel = "noopener";
+          card.appendChild(link);
+        } else {
+          const status = document.createElement("div");
+          status.className = "meta";
+          status.textContent = "Document de démonstration — PDF non ajouté";
+          card.appendChild(status);
+        }
+
+        results.appendChild(card);
+      });
+    }
+
+    [search, subject, series, year].forEach(element => {
+      element.addEventListener("input", render);
+      element.addEventListener("change", render);
+    });
+
+    document.getElementById("currentYear").textContent =
+      new Date().getFullYear();
+
+    render();
+  </script>
+</body>
+</html>
