@@ -222,6 +222,15 @@
 
     async function loadCover(box) {
       const url = box.dataset.url;
+      if (box.dataset.cover) {
+        const img = document.createElement("img");
+        img.alt = "Couverture";
+        img.loading = "lazy";
+        img.onerror = () => { box.dataset.cover = ""; loadCover(box); };
+        img.src = box.dataset.cover;
+        box.replaceChildren(img);
+        return;
+      }
       if (!url || !window.pdfjsLib) return;
       try {
         const src = await makeCover(url);
@@ -337,6 +346,7 @@
           annee: row.annee,
           description: row.description,
           url: pdfUrl(row.fichier_path),
+          cover: row.couverture_path ? pdfUrl(row.couverture_path) : "",
           downloadUrl: downloadUrl(pdfUrl(row.fichier_path), row.titre)
         }));
         fillFilter(subject, documents.map(d => d.matiere));
@@ -401,6 +411,7 @@
         const cover = document.createElement("div");
         cover.className = "cover";
         cover.dataset.url = doc.url;
+        cover.dataset.cover = doc.cover || "";
         const placeholder = document.createElement("div");
         placeholder.className = "ph";
         placeholder.textContent = "📘";
