@@ -1,633 +1,153 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#123c32">
-  <meta name="description" content="Annales, épreuves et livres pour préparer le BAC 2 au Togo.">
-  <title>Annales BAC 2 - TG</title>
-  <style>
-    :root {
-      --green:#123c32; --green2:#176b50; --gold:#f4c95d;
-      --bg:#f4f7f5; --text:#172720; --muted:#65736c;
-    }
-    * { box-sizing:border-box; }
-    body { margin:0; font-family:system-ui,Arial,sans-serif; color:var(--text); background:var(--bg); }
-    body.locked { overflow:hidden; }
-    header { background:var(--green); color:white; padding:18px 5%; }
-    .brand { font-size:21px; font-weight:850; letter-spacing:-.5px; }
-    .brand span { color:var(--gold); }
-    .tagline { margin-top:5px; color:#d6e5dd; font-size:13px; }
-    .hero { background:linear-gradient(135deg,#123c32,#176b50); color:white; padding:35px 5% 42px; }
-    .hero h1 { margin:0 0 12px; font-size:clamp(27px,7vw,42px); line-height:1.15; }
-    .hero p { margin:0 0 22px; color:#e1eee7; line-height:1.6; }
-    .search-wrap { display:flex; align-items:center; gap:10px; background:white; border-radius:14px; padding:0 15px; max-width:650px; box-shadow:0 8px 25px #001a1025; }
-    .search-wrap span { font-size:21px; }
-    #search { border:0; outline:0; width:100%; min-width:0; padding:17px 0; font-size:16px; color:var(--text); background:transparent; }
-    main { width:min(1100px,92%); margin:28px auto 50px; }
-    .section-head { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:10px; margin-bottom:15px; }
-    h2 { margin:0; font-size:22px; }
-    .count { color:var(--muted); font-size:13px; }
-    .filters { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:22px; }
-    select { width:100%; padding:12px; border:1px solid #d9e2dc; border-radius:10px; background:white; color:var(--text); font-size:14px; }
-    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,235px),1fr)); gap:15px; }
-    .document { background:white; border:1px solid #e5ebe6; border-radius:15px; padding:18px; box-shadow:0 3px 12px #183a2410; }
-    .cover { position:relative; width:100%; aspect-ratio:3/4; max-height:340px; background:#e5f2e9; border-radius:12px; overflow:hidden; display:grid; place-items:center; margin-bottom:14px; cursor:pointer; border:1px solid #dbe8df; }
-    .cover img { width:100%; height:100%; object-fit:cover; object-position:top; display:block; }
-    .ph { font-size:44px; }
-    .document h3 { margin:0 0 8px; font-size:17px; overflow-wrap:anywhere; }
-    .meta { color:var(--muted); font-size:13px; line-height:1.8; }
-    .description { color:#47574e; font-size:14px; line-height:1.5; margin:10px 0 16px; }
-    .actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
-    .btn { display:block; text-align:center; text-decoration:none; border:0; cursor:pointer; font-family:inherit; border-radius:9px; padding:12px 8px; font-weight:700; font-size:14px; }
-    .btn-preview { background:#e5f2e9; color:var(--green); }
-    .download { background:var(--green2); color:white; }
-    .empty { text-align:center; padding:35px 15px; color:var(--muted); background:white; border-radius:14px; grid-column:1/-1; }
-    .empty strong { display:block; color:var(--text); margin-bottom:7px; }
-    .notice { margin-top:24px; padding:15px; background:#fff7df; border-radius:12px; color:#65521e; font-size:13px; line-height:1.6; }
-    .exam-section { margin-top:38px; padding-top:28px; border-top:3px solid #dce8df; }
-    .exam-intro { color:var(--muted); line-height:1.6; margin:8px 0 18px; }
-    .exam-badge { display:inline-block; background:#e5f2e9; color:var(--green); padding:5px 9px; border-radius:7px; font-size:12px; font-weight:700; margin-bottom:10px; }
-    .exam-unavailable { background:#fff7df; color:#65521e; border-radius:9px; padding:10px; font-size:13px; margin-top:12px; line-height:1.5; }
-    .viewer { position:fixed; inset:0; z-index:100; background:#1b1f1d; display:none; flex-direction:column; }
-    .viewer.open { display:flex; }
-    .viewer-bar { display:flex; align-items:center; gap:8px; padding:10px 12px; background:var(--green); color:white; }
-    .viewer-title { flex:1; min-width:0; font-weight:700; font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .viewer-bar .btn { padding:9px 12px; font-size:13px; }
-    .btn-close { background:#ffffff22; color:white; }
-    .viewer-info { font-size:12px; color:#d6e5dd; padding:6px 12px; background:#0f2f27; }
-    .viewer-body { flex:1; min-height:0; overflow-y:auto; padding:10px; -webkit-overflow-scrolling:touch; }
-    .page { background:white; margin:0 auto 10px; width:100%; max-width:900px; position:relative; }
-    .page canvas { width:100%; height:100%; display:block; }
-    .page .loading { position:absolute; inset:0; display:grid; place-items:center; color:var(--muted); font-size:13px; }
-    footer { background:var(--green); color:#d6e5dd; text-align:center; padding:24px 5%; font-size:13px; line-height:1.8; }
-    @media(min-width:650px) {
-      .filters { grid-template-columns:repeat(3,1fr); }
-      .hero { padding-top:52px; padding-bottom:55px; }
-    }
-  </style>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#063b31"><meta name="description" content="Annales et épreuves du BAC 2 au Togo.">
+<title>Annales BAC 2 - TG</title>
+<style>
+:root{--green:#063b31;--green2:#08745b;--gold:#f6c94f;--ink:#17342c;--muted:#64766f;--bg:#f4f7f4}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:var(--bg);color:var(--ink)}button,input,select{font:inherit}button,a,select{cursor:pointer}.topbar{height:74px;padding:12px 5%;display:flex;align-items:center;justify-content:space-between;gap:16px;background:#042f28;color:#fff;border-bottom:1px solid #ffffff25}.brand{font-weight:900;font-size:clamp(17px,3vw,25px);letter-spacing:-.5px}.brand span{color:var(--gold)}.tagline{font-size:12px;color:#d2e5dc;margin-top:3px}.top-actions{display:flex;align-items:center;gap:12px}.top-actions button{background:transparent;border:1px solid #ffffff90;color:#fff;border-radius:24px;padding:10px 16px}.hero{position:relative;min-height:650px;padding:55px 5%;display:grid;grid-template-columns:1.05fr .95fr;align-items:center;gap:35px;color:white;background:linear-gradient(90deg,rgba(2,42,34,.94),rgba(2,42,34,.72) 55%,rgba(2,42,34,.4)),url('https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=2000&q=85') center/cover}.hero-copy{max-width:610px}.eyebrow{color:var(--gold);font-weight:800;letter-spacing:2px;text-transform:uppercase;font-size:12px}.hero h1{font-size:clamp(36px,5.4vw,66px);line-height:1.03;margin:14px 0}.hero h1 span{color:var(--gold)}.hero-copy p{font-size:18px;line-height:1.7;color:#e3eee8;max-width:540px}.slogan{color:var(--gold);font-style:italic;font-size:20px;margin-top:24px}.login-card{background:#fff;color:var(--ink);padding:30px;border-radius:20px;max-width:460px;width:100%;justify-self:center;box-shadow:0 24px 65px #001b1580}.login-head{display:flex;align-items:center;gap:14px;margin-bottom:22px}.login-icon{display:grid;place-items:center;width:54px;height:54px;flex-shrink:0;border-radius:50%;background:var(--green);color:white;font-size:24px}.login-head h2{margin:0;font-size:23px}.login-head p{margin:5px 0 0;color:var(--muted);font-size:13px}.field{display:block;margin:15px 0}.field span{display:block;font-weight:750;font-size:13px;margin-bottom:7px}.field input,.field select{width:100%;padding:14px;border:1px solid #d8e2dc;border-radius:9px;background:#fbfdfb;color:var(--ink);outline-color:var(--green2)}.primary{width:100%;border:0;border-radius:10px;padding:15px;background:linear-gradient(100deg,#087c5b,#07513f);color:#fff;font-weight:800;margin-top:8px}.small-note{font-size:11px;color:var(--muted);text-align:center;margin:16px 0 0;line-height:1.6}.resources{padding:45px 5% 48px;background:#fff}.section-title{text-align:center;margin:0 0 8px;font-size:clamp(25px,3vw,34px);color:var(--green)}.section-sub{text-align:center;color:var(--muted);margin:0 auto 28px;line-height:1.6}.resource-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px;max-width:1200px;margin:auto}.resource-card{min-height:250px;border-radius:16px;padding:28px;color:#fff;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;overflow:hidden;background:linear-gradient(0deg,rgba(0,45,35,.96),rgba(0,65,49,.48)),url('https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=1000&q=80') center/cover}.resource-card.exam{background:linear-gradient(0deg,rgba(77,54,0,.96),rgba(77,54,0,.38)),url('https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=1000&q=80') center/cover}.resource-symbol{font-size:34px;margin-bottom:12px}.resource-card h3{font-size:28px;margin:0 0 8px}.resource-card p{max-width:430px;line-height:1.6;margin:0 0 20px;color:#f1f6f2}.pill{border:0;border-radius:30px;padding:12px 22px;background:#f3fff8;color:var(--green);font-weight:850}.exam .pill{background:var(--gold);color:#18362c}.benefits{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;max-width:1200px;margin:32px auto 0}.benefit{display:flex;align-items:center;gap:12px;font-size:13px}.benefit b{display:block;margin-bottom:4px}.benefit .ico{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:#e0f1e8;color:var(--green);font-size:20px;flex-shrink:0}.app{display:none;min-height:60vh;padding:30px 5% 55px}.app.active{display:block}.app-head{max-width:1200px;margin:0 auto 20px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}.app-head h2{margin:0;color:var(--green);font-size:28px}.app-head p{margin:6px 0 0;color:var(--muted)}.back{border:1px solid #cad9d0;background:#fff;color:var(--green);border-radius:9px;padding:10px 14px;font-weight:750}.searchbox{max-width:1200px;margin:0 auto 14px}.searchbox input{width:100%;padding:14px 16px;border:1px solid #d5e0d8;border-radius:11px;background:white}.filters{max-width:1200px;margin:0 auto 22px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.filters select{padding:12px;border:1px solid #d5e0d8;border-radius:9px;background:white;color:var(--ink);width:100%}.count{max-width:1200px;margin:0 auto 14px;color:var(--muted);font-size:13px}.grid{max-width:1200px;margin:auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,245px),1fr));gap:16px}.doc{background:white;border:1px solid #e0e9e2;border-radius:14px;padding:18px;box-shadow:0 5px 18px #103d2510;display:flex;flex-direction:column}.doc-icon{height:100px;border-radius:10px;background:#e8f4ec;display:grid;place-items:center;font-size:44px;margin-bottom:14px}.doc h3{margin:0 0 8px;overflow-wrap:anywhere}.meta{font-size:13px;line-height:1.7;color:var(--muted)}.desc{font-size:14px;line-height:1.5;color:#4d6157;flex:1}.actions{display:flex;gap:8px;margin-top:12px}.actions a,.actions button{flex:1;text-align:center;padding:11px 8px;border:0;border-radius:8px;text-decoration:none;font-weight:750;font-size:13px}.preview{background:#e4f2e8;color:var(--green)}.download{background:var(--green2);color:white}.unavailable{background:#fff4d8;color:#6b5415;padding:10px;border-radius:8px;font-size:12px;line-height:1.5}.empty{grid-column:1/-1;text-align:center;background:#fff;border-radius:12px;padding:35px;color:var(--muted)}.empty b{display:block;color:var(--ink);margin-bottom:8px}.hidden{display:none!important}.tabs{display:flex;gap:6px;background:#eef4f0;padding:4px;border-radius:12px;margin-bottom:14px}.tab{flex:1;border:0;background:transparent;padding:10px;border-radius:9px;font-weight:800;color:var(--muted)}.tab.active{background:#fff;color:var(--green);box-shadow:0 2px 8px #0b3d2b18}.google{width:100%;border:1px solid #d5e0d8;background:#fff;border-radius:10px;padding:13px;font-weight:800;color:var(--ink)}.or{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:12px;margin:14px 0 4px}.or::before,.or::after{content:"";flex:1;height:1px;background:#e0e9e2}.check{display:flex;gap:10px;align-items:flex-start;font-size:12px;line-height:1.5;color:var(--muted);margin:12px 0}.check input{margin-top:3px;flex-shrink:0}.linkbtn{background:none;border:0;color:var(--green2);font-weight:700;font-size:13px;padding:8px 0;text-decoration:underline}.msg{font-size:13px;line-height:1.5;margin:12px 0 0}.msg.ok{color:#0a6b4b}.msg.err{color:#b3261e}.pcard{max-width:560px;margin:0 auto;background:#fff;border:1px solid #e0e9e2;border-radius:16px;padding:24px}.primary:disabled{opacity:.6}#choice{min-height:60vh}footer{background:#032e27;color:#d3e5dd;text-align:center;padding:28px 5%;font-size:13px;line-height:1.8}footer strong{color:white} @media(max-width:800px){.hero{grid-template-columns:1fr;min-height:auto;padding-top:48px;padding-bottom:45px}.hero-copy{margin:auto}.login-card{justify-self:center}.benefits{grid-template-columns:repeat(2,1fr)}}@media(max-width:560px){.topbar{padding:12px 4%;}.tagline{max-width:230px}.top-actions button{padding:8px 10px;font-size:12px}.hero{padding:38px 5%;gap:25px}.login-card{padding:22px}.resource-grid{grid-template-columns:1fr}.resource-card{min-height:235px;padding:23px}.benefits{grid-template-columns:1fr 1fr;gap:16px}.filters{grid-template-columns:1fr}.app{padding:25px 4% 40px}.app-head h2{font-size:24px}}@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
 </head>
 <body>
-<header>
-  <div class="brand">ANNALES <span>BAC 2 - TG</span></div>
-  <div class="tagline">Ta bibliothèque pour réussir le BAC 2 au Togo</div>
-</header>
-
-<section class="hero">
-  <h1>Révise mieux.<br>Réussis ton BAC.</h1>
-  <p>Retrouve tes annales, épreuves et livres scolaires au même endroit.</p>
-  <label class="search-wrap">
-    <span>🔎</span>
-    <input id="search" type="search" placeholder="Ex. : physique, maths, 2024..." autocomplete="off">
-  </label>
-</section>
-
-<main>
-  <section>
-    <div class="section-head">
-      <h2>Bibliothèque</h2>
-      <span id="count" class="count">Chargement…</span>
-    </div>
-    <div class="filters">
-      <select id="subject"><option value="">Toutes les matières</option></select>
-      <select id="series"><option value="">Toutes les séries</option></select>
-      <select id="year"><option value="">Toutes les années</option></select>
-    </div>
-    <div id="results" class="grid"></div>
-    <div class="notice">📚 Les documents disponibles seront ajoutés progressivement.</div>
-  </section>
-
-  <section class="exam-section" id="epreuves">
-    <div class="section-head">
-      <h2>Épreuves du BAC 2</h2>
-      <span id="examCount" class="count">Chargement…</span>
-    </div>
-    <p class="exam-intro">
-      Retrouve les épreuves selon ta série, la matière et l’année.
-      Les sujets seront ajoutés progressivement.
-    </p>
-    <div class="filters">
-      <select id="examSeries">
-        <option value="">Toutes les séries</option>
-        <option value="A4">Série A4</option>
-        <option value="C">Série C</option>
-        <option value="D">Série D</option>
-      </select>
-      <select id="examSubject"><option value="">Toutes les matières</option></select>
-      <select id="examYear"><option value="">Toutes les années</option></select>
-    </div>
-    <div id="examResults" class="grid"></div>
-  </section>
-</main>
-
-<footer>
-  <strong>ANNALES BAC 2 - TG</strong><br>
-  Un outil de révision pour les élèves du Togo.<br>
-  © <span id="currentYear"></span> — Tous droits réservés.
-</footer>
-
-<div id="viewer" class="viewer" aria-hidden="true">
-  <div class="viewer-bar">
-    <div id="viewerTitle" class="viewer-title"></div>
-    <a id="viewerDownload" class="btn download" target="_blank" rel="noopener">Télécharger</a>
-    <button id="viewerClose" class="btn btn-close" type="button">✕ Fermer</button>
-  </div>
-  <div id="viewerInfo" class="viewer-info"></div>
-  <div id="viewerBody" class="viewer-body"></div>
+<header class="topbar"><div><div class="brand">🎓 ANNALES <span>BAC 2 - TG</span></div><div class="tagline">Ta réussite commence ici</div></div><div class="top-actions"><button type="button" id="homeBtn">⌂ Accueil</button><button type="button" id="profileBtn" class="hidden">♙ Mon profil</button><button type="button" id="headerLogin">♙ Se connecter</button></div></header>
+<section class="hero" id="home">
+ <div class="hero-copy"><div class="eyebrow">Cap sur la réussite</div><h1>Bienvenue sur<br><span>ANNALES BAC 2 - TG</span></h1><p>Accède aux annales, aux épreuves et aux ressources pour préparer ton BAC 2 au Togo.</p><div class="slogan">Ton avenir se prépare maintenant !</div></div>
+ <div class="login-card" id="authCard">
+ <div class="login-head"><div class="login-icon">♙</div><div><h2>Ton espace élève</h2><p>Connecte-toi ou crée ton compte</p></div></div>
+ <div class="tabs"><button type="button" class="tab active" id="tabLogin">Connexion</button><button type="button" class="tab" id="tabSignup">Inscription</button></div>
+ <form id="loginForm">
+  <label class="field"><span>E-mail</span><input id="liEmail" type="email" autocomplete="email" required maxlength="120" placeholder="ton@email.com"></label>
+  <label class="field"><span>Mot de passe</span><input id="liPass" type="password" autocomplete="current-password" required minlength="8" maxlength="72"></label>
+  <button class="primary" type="submit">Se connecter　→</button>
+  <button class="linkbtn" type="button" id="forgotBtn">Mot de passe oublié ?</button>
+ </form>
+ <form id="signupForm" class="hidden">
+  <label class="field"><span>Nom</span><input id="suNom" autocomplete="family-name" required maxlength="60" placeholder="Ex. : Koffi"></label>
+  <label class="field"><span>Prénom</span><input id="suPrenom" autocomplete="given-name" required maxlength="60" placeholder="Ex. : Ayélé"></label>
+  <label class="field"><span>Classe</span><input id="suClasse" list="classes" required maxlength="60" placeholder="Ex. : Terminale D"></label>
+  <label class="field"><span>Établissement</span><input id="suEtab" required maxlength="120" placeholder="Ex. : Lycée de Tokoin"></label>
+  <label class="field"><span>E-mail</span><input id="suEmail" type="email" autocomplete="email" required maxlength="120" placeholder="ton@email.com"></label>
+  <label class="field"><span>Mot de passe (8 caractères minimum)</span><input id="suPass" type="password" autocomplete="new-password" required minlength="8" maxlength="72"></label>
+  <label class="check"><input type="checkbox" id="suConsent" required><span>J’accepte que mes informations (nom, prénom, classe, établissement, e-mail) servent à gérer mon compte et à accéder aux annales.</span></label>
+  <button class="primary" type="submit">Créer mon compte　→</button>
+ </form>
+ <datalist id="classes"><option value="Terminale A4"><option value="Terminale C"><option value="Terminale D"><option value="Terminale E"><option value="Première A4"><option value="Première C"><option value="Première D"></datalist>
+ <p class="msg" id="authMsg" role="status"></p>
 </div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+</section>
+<section class="resources hidden" id="choice"><h2 class="section-title">Que veux-tu consulter ?</h2><p class="section-sub">Choisis une rubrique pour continuer.</p><div class="resource-grid">
+ <article class="resource-card"><div class="resource-symbol">📚</div><h3>Annales</h3><p>Retrouve les annales par matière, série et année.</p><button class="pill" type="button" data-open="annales">Explorer les annales　→</button></article>
+ <article class="resource-card exam"><div class="resource-symbol">📝</div><h3>Épreuves du BAC 2</h3><p>Accède aux sujets selon la série, la matière et l’année.</p><button class="pill" type="button" data-open="epreuves">Voir les épreuves　→</button></article>
+ </div></section>
+<section class="app" id="annalesApp"><div class="app-head"><div><h2>📚 Bibliothèque des annales</h2><p>Les annales restent séparées des épreuves du BAC 2.</p></div><button class="back" type="button" data-home>← Retour</button></div><div class="searchbox"><input id="annSearch" type="search" placeholder="Rechercher une annale : matière, série, année…"></div><div class="filters"><select id="annSubject"><option value="">Toutes les matières</option></select><select id="annSeries"><option value="">Toutes les séries</option></select><select id="annYear"><option value="">Toutes les années</option></select></div><div class="count" id="annCount">Chargement des annales…</div><div class="grid" id="annResults"></div></section>
+<section class="app" id="epreuvesApp"><div class="app-head"><div><h2>📝 Épreuves du BAC 2</h2><p>Recherche libre dans toutes les épreuves disponibles, sans restriction de classe.</p></div><button class="back" type="button" data-home>← Retour</button></div><div class="searchbox"><input id="examSearch" type="search" placeholder="Rechercher une épreuve : matière, série, année…"></div><div class="filters"><select id="examSeries"><option value="">Toutes les séries</option><option value="A4">Série A4</option><option value="C">Série C</option><option value="D">Série D</option></select><select id="examSubject"><option value="">Toutes les matières</option></select><select id="examYear"><option value="">Toutes les années</option></select></div><div class="count" id="examCount">Chargement des épreuves…</div><div class="grid" id="examResults"></div></section>
+<section class="app" id="profileApp"><div class="app-head"><div><h2>♙ Mon profil</h2><p>Vérifie tes informations. Tu peux les modifier à tout moment.</p></div><button class="back" type="button" data-home>← Retour</button></div>
+<form class="pcard" id="profileForm">
+ <label class="field"><span>E-mail</span><input id="pfEmail" type="email" disabled></label>
+ <label class="field"><span>Nom</span><input id="pfNom" required maxlength="60" autocomplete="family-name"></label>
+ <label class="field"><span>Prénom</span><input id="pfPrenom" required maxlength="60" autocomplete="given-name"></label>
+ <label class="field"><span>Classe</span><input id="pfClasse" list="classes" required maxlength="60" placeholder="Ex. : Terminale D"></label>
+ <label class="field"><span>Établissement</span><input id="pfEtab" required maxlength="120" placeholder="Ex. : Lycée de Tokoin"></label>
+ <button class="primary" type="submit">Enregistrer</button>
+ <p class="msg" id="profMsg" role="status"></p>
+</form></section>
+<section class="app" id="recoveryApp"><div class="app-head"><div><h2>🔑 Nouveau mot de passe</h2><p>Choisis un nouveau mot de passe pour ton compte.</p></div></div>
+<form class="pcard" id="recoveryForm">
+ <label class="field"><span>Nouveau mot de passe (8 caractères minimum)</span><input id="rcPass" type="password" autocomplete="new-password" required minlength="8" maxlength="72"></label>
+ <label class="field"><span>Confirme le mot de passe</span><input id="rcPass2" type="password" autocomplete="new-password" required minlength="8" maxlength="72"></label>
+ <button class="primary" type="submit">Enregistrer le mot de passe</button>
+ <p class="msg" id="rcMsg" role="status"></p>
+</form></section>
+<footer><strong>ANNALES BAC 2 - TG</strong><br>Ta bibliothèque pour réussir le BAC 2 au Togo.<br>🇹🇬 Togo · © <span id="currentYear"></span> Tous droits réservés.</footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.js"></script>
 <script>
-"use strict";
-
-/* CONFIGURATION SUPABASE */
-const SUPABASE_URL = "https://wxmmjkldpxjtwwpaasbg.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_kIeM8V8nXL5DacSm9VbwZw_INj2HU9q";
-const BUCKET = "annales-pdf";
-
-if (window.pdfjsLib) {
-  pdfjsLib.GlobalWorkerOptions.workerSrc =
-    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+'use strict';
+const SUPABASE_URL='https://wxmmjkldpxjtwwpaasbg.supabase.co';
+const SUPABASE_ANON_KEY='sb_publishable_kIeM8V8nXL5DacSm9VbwZw_INj2HU9q';
+const BUCKET='annales-pdf';
+let session=null;
+const $=id=>document.getElementById(id);let documents=[],exams=[];
+const norm=v=>String(v??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+function headers(){const t=session&&session.access_token;return {'apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+(t||SUPABASE_ANON_KEY)};}
+function fileUrl(path){if(!path)return '';if(/^https?:\/\//i.test(String(path)))return String(path);return SUPABASE_URL+'/storage/v1/object/public/'+BUCKET+'/'+String(path).split('/').map(encodeURIComponent).join('/');}
+function downloadUrl(url,title){if(!url)return '';const name=String(title||'document').replace(/[\\/:*?"<>|]+/g,' ').trim()||'document';return url+(url.includes('?')?'&':'?')+'download='+encodeURIComponent(name+'.pdf');}
+async function fetchTable(table,query='?select=*'){const r=await fetch(SUPABASE_URL+'/rest/v1/'+table+query,{headers:headers()});if(!r.ok)throw Error(table+' HTTP '+r.status+' '+(await r.text()).slice(0,160));return r.json();}
+function pick(row,candidates){for(const c of candidates){const key=Object.keys(row||{}).find(k=>norm(k).replace(/[\s_-]/g,'')===norm(c).replace(/[\s_-]/g,''));if(key&&row[key]!==null&&row[key]!==undefined&&row[key]!=='')return row[key];}return '';}
+function fillSelect(el,values,first,reverse=false){const old=el.value;const vals=[...new Set(values.map(v=>String(v??'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'fr',{numeric:true}));if(reverse)vals.reverse();el.replaceChildren(new Option(first,''),...vals.map(v=>new Option(v,v)));if(vals.includes(old))el.value=old;}
+function empty(container,title,message){container.replaceChildren();const box=document.createElement('div');box.className='empty';const b=document.createElement('b');b.textContent=title;const p=document.createElement('span');p.textContent=message;box.append(b,p);container.append(box);}
+function card(doc,isExam=false){const c=document.createElement('article');c.className='doc';const ico=document.createElement('div');ico.className='doc-icon';ico.textContent=isExam?'📝':'📘';c.append(ico);const h=document.createElement('h3');h.textContent=doc.titre;c.append(h);const meta=document.createElement('div');meta.className='meta';meta.textContent=(doc.matiere||'Matière non précisée')+' · Série '+(doc.serie||'non précisée')+' · '+(doc.annee||'année non précisée');c.append(meta);const p=document.createElement('p');p.className='desc';p.textContent=doc.description||(isExam?'Épreuve du BAC 2.':'Document de révision.');c.append(p);if(doc.url){const actions=document.createElement('div');actions.className='actions';const prev=document.createElement('a');prev.className='preview';prev.textContent='👁 Aperçu';prev.href=doc.url;prev.target='_blank';prev.rel='noopener';const dl=document.createElement('a');dl.className='download';dl.textContent='Télécharger';dl.href=downloadUrl(doc.url,doc.titre);dl.target='_blank';dl.rel='noopener';actions.append(prev,dl);c.append(actions);}else if(isExam){const n=document.createElement('div');n.className='unavailable';n.textContent='📄 PDF indisponible pour le moment. Le sujet sera ajouté dès que le fichier sera disponible.';c.append(n);}return c;}
+function renderAnnales(){const q=norm($('annSearch').value),s=$('annSubject').value,se=$('annSeries').value,y=$('annYear').value;const list=documents.filter(d=>(!q||norm([d.titre,d.matiere,d.serie,d.annee,d.description].join(' ')).includes(q))&&(!s||d.matiere===s)&&(!se||d.serie===se)&&(!y||String(d.annee)===y));$('annCount').textContent=list.length+' annale(s)';$('annResults').replaceChildren();if(!list.length)empty($('annResults'),'Aucune annale trouvée','Essaie un autre mot ou retire un filtre.');else list.forEach(d=>$('annResults').append(card(d)));}
+function renderExams(){const q=norm($('examSearch').value),s=$('examSubject').value,se=$('examSeries').value,y=$('examYear').value;const list=exams.filter(d=>(!q||norm([d.titre,d.matiere,d.serie,d.annee,d.description].join(' ')).includes(q))&&(!se||norm(d.serie)===norm(se))&&(!s||d.matiere===s)&&(!y||String(d.annee)===y));$('examCount').textContent=list.length+' épreuve(s)';$('examResults').replaceChildren();if(!list.length)empty($('examResults'),'Aucune épreuve trouvée','Aucun sujet ne correspond à ces filtres. Essaie une autre recherche.');else list.forEach(d=>$('examResults').append(card(d,true)));}
+async function loadAnnales(){try{const rows=await fetchTable('annales','?select=*&publie=eq.true&order=annee.desc,titre.asc');documents=rows.map(r=>({titre:r.titre||'Document de révision',matiere:r.matiere||'',serie:r.serie||'',annee:r.annee||'',description:r.description||'',url:fileUrl(r.fichier_path)}));fillSelect($('annSubject'),documents.map(d=>d.matiere),'Toutes les matières');fillSelect($('annSeries'),documents.map(d=>d.serie),'Toutes les séries');fillSelect($('annYear'),documents.map(d=>d.annee),'Toutes les années',true);renderAnnales();}catch(e){console.error(e);$('annCount').textContent='Erreur de chargement';empty($('annResults'),'Impossible de charger les annales','Vérifie les paramètres Supabase et les autorisations de la table annales.');}}
+function examFile(r){return pick(r,['fichier_path','pdf_path','chemin_pdf','fichier','pdf_url','url_pdf','file_url','file_path','document_url','url','lien_pdf','lien']);}
+async function loadExams(){try{const rows=await fetchTable('epreuves_bac2');exams=rows.filter(r=>{const v=pick(r,['visible','is_visible']);return v===''||v===true||String(v).toLowerCase()==='true';}).map((r,i)=>{const subject=String(pick(r,['matiere','matière','subject','discipline','nom_matiere','nom_matière'])||'Matière non précisée');const serie=String(pick(r,['serie','série','series','filiere','filière','section'])||'Non précisée');const annee=String(pick(r,['annee','année','year','session','annee_bac'])||'Année non précisée');return {id:pick(r,['id','uuid'])||i,titre:String(pick(r,['titre','nom','intitule','intitulé','title','libelle','libellé','epreuve','épreuve'])||subject+' — Série '+serie),matiere:subject,serie,annee,description:String(pick(r,['description','details','observation','commentaire'])||''),url:fileUrl(examFile(r))};});fillSelect($('examSubject'),exams.map(d=>d.matiere),'Toutes les matières');fillSelect($('examYear'),exams.map(d=>d.annee).filter(v=>v!=='Année non précisée'),'Toutes les années',true);renderExams();}catch(e){console.error(e);$('examCount').textContent='Erreur de chargement';empty($('examResults'),'Impossible de charger les épreuves','Vérifie que la table epreuves_bac2 existe et que les autorisations Supabase sont correctes.');}}
+const SITE_URL=location.origin+location.pathname;
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+let profile=null,entered=null,recovering=false;
+const VIEWS={home:'home',choice:'choice',annales:'annalesApp',epreuves:'epreuvesApp',profile:'profileApp',recovery:'recoveryApp'};
+function view(name){const t=VIEWS[name];['home','choice'].forEach(id=>$(id).classList.toggle('hidden',id!==t));['annalesApp','epreuvesApp','profileApp','recoveryApp'].forEach(id=>$(id).classList.toggle('active',id===t));window.scrollTo({top:0});}
+function say(el,text,ok){el.textContent=text||'';el.className='msg'+(text?(ok?' ok':' err'):'');}
+function frErr(e){const m=String((e&&e.message)||e||'');
+ if(/already registered|already been registered/i.test(m))return 'Cette adresse e-mail est déjà inscrite. Connecte-toi.';
+ if(/invalid login credentials/i.test(m))return 'E-mail ou mot de passe incorrect.';
+ if(/email not confirmed/i.test(m))return 'Confirme d’abord ton adresse e-mail (vérifie ta boîte de réception).';
+ if(/at least|weak/i.test(m))return 'Mot de passe trop court ou trop faible (8 caractères minimum).';
+ if(/rate limit|too many/i.test(m))return 'Trop de tentatives ou d’e-mails envoyés. Réessaie un peu plus tard.';
+ if(/failed to fetch|network/i.test(m))return 'Connexion impossible. Vérifie ton réseau.';
+ return 'Une erreur est survenue : '+m;}
+function profileOk(){return !!(profile&&profile.nom&&profile.prenom&&profile.classe&&profile.etablissement);}
+function paintHeader(){const tag=document.querySelector('.tagline');
+ if(session){tag.textContent=profile&&profile.prenom?'Bienvenue '+profile.prenom+' '+profile.nom+(profile.classe?' · '+profile.classe:''):(session.user.email||'Connecté');$('headerLogin').textContent='♙ Se déconnecter';$('profileBtn').classList.remove('hidden');}
+ else{tag.textContent='Ta réussite commence ici';$('headerLogin').textContent='♙ Se connecter';$('profileBtn').classList.add('hidden');}}
+function fillProfileForm(){$('pfEmail').value=(session&&session.user.email)||'';$('pfNom').value=(profile&&profile.nom)||'';$('pfPrenom').value=(profile&&profile.prenom)||'';$('pfClasse').value=(profile&&profile.classe)||'';$('pfEtab').value=(profile&&profile.etablissement)||'';}
+function goHome(){view(!session?'home':(profileOk()?'choice':'profile'));}
+function showApp(which){view(which);if(which==='annales')renderAnnales();if(which==='epreuves')renderExams();}
+async function enter(sess){
+ session=sess;entered=sess.user.id;
+ const {data,error}=await sb.from('profiles').select('*').eq('id',sess.user.id).maybeSingle();
+ if(error)console.error(error);
+ profile=data||null;fillProfileForm();paintHeader();loadAnnales();loadExams();
+ if(recovering)return;
+ if(profileOk())view('choice');else{view('profile');say($('profMsg'),'Complète ton profil pour continuer.',true);}
 }
-
-let documents = [];
-let exams = [];
-const pdfCache = new Map();
-const coverCache = new Map();
-
-const $ = id => document.getElementById(id);
-const search = $("search");
-const subject = $("subject");
-const series = $("series");
-const year = $("year");
-const results = $("results");
-const count = $("count");
-const examResults = $("examResults");
-const examCount = $("examCount");
-const examSeries = $("examSeries");
-const examSubject = $("examSubject");
-const examYear = $("examYear");
-const viewer = $("viewer");
-const viewerTitle = $("viewerTitle");
-const viewerDownload = $("viewerDownload");
-const viewerClose = $("viewerClose");
-const viewerInfo = $("viewerInfo");
-const viewerBody = $("viewerBody");
-
-const normalize = value => String(value ?? "")
-  .normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
-
-function apiHeaders() {
-  return SUPABASE_ANON_KEY.startsWith("eyJ")
-    ? { apikey:SUPABASE_ANON_KEY, Authorization:"Bearer " + SUPABASE_ANON_KEY }
-    : { apikey:SUPABASE_ANON_KEY };
-}
-
-function pdfUrl(path) {
-  if (!path) return "";
-  if (/^https?:\/\//i.test(String(path))) return String(path);
-  const encoded = String(path).split("/").map(encodeURIComponent).join("/");
-  return SUPABASE_URL + "/storage/v1/object/public/" + BUCKET + "/" + encoded;
-}
-
-function downloadUrl(url, titre) {
-  if (!url) return "";
-  const name = String(titre || "document")
-    .replace(/[\\/:*?"<>|]+/g, " ").replace(/\s+/g, " ").trim() || "document";
-  return url + (url.includes("?") ? "&" : "?") + "download=" + encodeURIComponent(name + ".pdf");
-}
-
-async function fetchTable(table) {
-  const url = SUPABASE_URL + "/rest/v1/" + encodeURIComponent(table) + "?select=*";
-  const response = await fetch(url, { headers:apiHeaders() });
-  if (!response.ok) {
-    const detail = await response.text().catch(() => "");
-    throw new Error(table + " : HTTP " + response.status + " " + detail.slice(0,180));
-  }
-  return response.json();
-}
-
-/* Trouve une valeur en testant plusieurs noms de colonnes possibles. */
-function pick(row, candidates) {
-  const keys = Object.keys(row || {});
-  for (const candidate of candidates) {
-    const key = keys.find(k => normalize(k).replace(/[\s_-]/g,"") ===
-      normalize(candidate).replace(/[\s_-]/g,""));
-    if (key && row[key] !== null && row[key] !== undefined && row[key] !== "") {
-      return row[key];
-    }
-  }
-  return "";
-}
-
-function getExamTitle(row) {
-  return String(pick(row, [
-    "titre","nom","intitule","intitulé","title","libelle","libellé",
-    "epreuve","épreuve","nom_epreuve","matiere","matière","subject"
-  ]) || "Épreuve du BAC 2");
-}
-
-function getExamSubject(row) {
-  return String(pick(row, [
-    "matiere","matière","subject","discipline","nom_matiere","nom_matière"
-  ]) || "Matière non précisée");
-}
-
-function getExamSeries(row) {
-  return String(pick(row, ["serie","série","series","filiere","filière","section"]) || "Non précisée");
-}
-
-function getExamYear(row) {
-  return String(pick(row, ["annee","année","year","session","annee_bac","année_bac"]) || "Année non précisée");
-}
-
-function getExamFile(row) {
-  return pick(row, [
-    "fichier_path","pdf_path","chemin_pdf","fichier","pdf_url","url_pdf",
-    "file_url","file_path","document_url","url","lien_pdf","lien"
-  ]);
-}
-
-function fillFilter(element, values, descending = false) {
-  const oldValue = element.value;
-  const unique = [...new Set(values.map(v => String(v ?? "").trim()).filter(Boolean))]
-    .sort((a,b) => a.localeCompare(b, "fr", { numeric:true }));
-  if (descending) unique.reverse();
-
-  element.replaceChildren(new Option(
-    element.id === "subject" || element.id === "examSubject"
-      ? "Toutes les matières"
-      : element.id === "series" || element.id === "examSeries"
-      ? "Toutes les séries" : "Toutes les années", ""
-  ));
-
-  unique.forEach(value => element.add(new Option(value, value)));
-  if (unique.includes(oldValue)) element.value = oldValue;
-}
-
-/* ---------- Chargement de la bibliothèque existante ---------- */
-async function loadDocuments() {
-  try {
-    const response = await fetch(
-      SUPABASE_URL + "/rest/v1/annales?select=*&publie=eq.true&order=annee.desc,titre.asc",
-      { headers:apiHeaders() }
-    );
-    if (!response.ok) throw new Error("HTTP " + response.status);
-    const rows = await response.json();
-
-    documents = rows.map(row => ({
-      titre:row.titre || "Document de révision",
-      matiere:row.matiere || "",
-      serie:row.serie || "",
-      annee:row.annee || "",
-      description:row.description || "",
-      url:pdfUrl(row.fichier_path),
-      cover:row.couverture_path ? pdfUrl(row.couverture_path) : ""
-    })).map(doc => ({ ...doc, downloadUrl:downloadUrl(doc.url, doc.titre) }));
-
-    fillFilter(subject, documents.map(d => d.matiere));
-    fillFilter(series, documents.map(d => d.serie));
-    fillFilter(year, documents.map(d => d.annee), true);
-    renderDocuments();
-  } catch (error) {
-    console.error("Chargement annales :", error);
-    count.textContent = "Erreur de chargement";
-    showEmpty(results, "Impossible de charger la bibliothèque",
-      "Vérifie la connexion et les paramètres Supabase.");
-  }
-}
-
-/* ---------- Chargement du catalogue des épreuves ---------- */
-async function loadExams() {
-  try {
-    const rows = await fetchTable("epreuves_bac2");
-
-    // La table peut contenir des entrées non visibles.
-    // Les lignes avec visible=false sont masquées.
-    exams = rows.filter(row => {
-      const visible = pick(row, ["visible","visibile","is_visible"]);
-      return visible === "" || visible === true || String(visible).toLowerCase() === "true";
-    }).map((row, index) => {
-      const file = getExamFile(row);
-      const titre = getExamTitle(row);
-      const rawYear = getExamYear(row);
-      const rawSeries = getExamSeries(row);
-      const rawSubject = getExamSubject(row);
-
-      return {
-        id:pick(row, ["id","uuid"]) || index,
-        titre,
-        matiere:rawSubject,
-        serie:rawSeries,
-        annee:rawYear,
-        description:String(pick(row, ["description","details","observation","commentaire"]) || ""),
-        url:pdfUrl(file),
-        original:row
-      };
-    });
-
-    fillFilter(examSubject, exams.map(d => d.matiere));
-    fillFilter(examYear, exams.map(d => d.annee).filter(v => v !== "Année non précisée"), true);
-    renderExams();
-  } catch (error) {
-    console.error("Chargement épreuves :", error);
-    examCount.textContent = "Erreur de chargement";
-    showEmpty(examResults, "Impossible de charger les épreuves",
-      "Vérifie que la table epreuves_bac2 existe et que l’accès API Supabase est autorisé.");
-  }
-}
-
-function showEmpty(container, titleText, messageText) {
-  container.replaceChildren();
-  const box = document.createElement("div");
-  box.className = "empty";
-  const title = document.createElement("strong");
-  title.textContent = titleText;
-  const message = document.createElement("span");
-  message.textContent = messageText;
-  box.append(title, message);
-  container.appendChild(box);
-}
-
-/* ---------- PDF et couvertures ---------- */
-function getPdf(url) {
-  if (!pdfCache.has(url)) {
-    const promise = fetch(url).then(response => {
-      if (!response.ok) throw new Error("HTTP " + response.status);
-      return response.arrayBuffer();
-    }).then(buffer => pdfjsLib.getDocument({
-      data:new Uint8Array(buffer), disableRange:true, disableStream:true
-    }).promise);
-    promise.catch(() => pdfCache.delete(url));
-    pdfCache.set(url, promise);
-  }
-  return pdfCache.get(url);
-}
-
-async function makeCover(url) {
-  if (coverCache.has(url)) return coverCache.get(url);
-  const pdf = await getPdf(url);
-  const page = await pdf.getPage(1);
-  const base = page.getViewport({ scale:1 });
-  const viewport = page.getViewport({ scale:420 / base.width });
-  const canvas = document.createElement("canvas");
-  canvas.width = viewport.width;
-  canvas.height = viewport.height;
-  await page.render({ canvasContext:canvas.getContext("2d"), viewport }).promise;
-  const data = canvas.toDataURL("image/jpeg", .82);
-  coverCache.set(url, data);
-  return data;
-}
-
-const coverObserver = "IntersectionObserver" in window
-  ? new IntersectionObserver(entries => entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        coverObserver.unobserve(entry.target);
-        loadCover(entry.target);
-      }
-    }), { rootMargin:"300px" })
-  : null;
-
-async function loadCover(box) {
-  const url = box.dataset.url;
-  if (!url || !window.pdfjsLib) return;
-  try {
-    const src = box.dataset.cover || await makeCover(url);
-    const img = document.createElement("img");
-    img.alt = "Couverture du document";
-    img.loading = "lazy";
-    img.src = src;
-    box.replaceChildren(img);
-  } catch (error) {
-    console.warn("Couverture indisponible", error);
-  }
-}
-
-/* ---------- Lecteur PDF ---------- */
-let pageObserver = null;
-let viewerOpen = false;
-
-async function openViewer(doc) {
-  if (!doc.url) return;
-  if (!window.pdfjsLib) {
-    window.open(doc.url, "_blank", "noopener");
-    return;
-  }
-
-  viewerOpen = true;
-  document.body.classList.add("locked");
-  viewer.classList.add("open");
-  viewer.setAttribute("aria-hidden", "false");
-  viewerTitle.textContent = doc.titre;
-  viewerDownload.href = downloadUrl(doc.url, doc.titre);
-  viewerInfo.textContent = "Chargement de l’aperçu…";
-  viewerBody.replaceChildren();
-  history.pushState({ viewer:true }, "");
-
-  try {
-    const pdf = await getPdf(doc.url);
-    if (!viewerOpen) return;
-    const first = await pdf.getPage(1);
-    const base = first.getViewport({ scale:1 });
-    const ratio = base.height / base.width;
-    viewerInfo.textContent = pdf.numPages + (pdf.numPages > 1 ? " pages" : " page") +
-      " · fais défiler pour lire";
-
-    if (pageObserver) pageObserver.disconnect();
-    pageObserver = new IntersectionObserver(entries => entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        pageObserver.unobserve(entry.target);
-        renderPage(pdf, entry.target);
-      }
-    }), { root:viewerBody, rootMargin:"800px 0px" });
-
-    for (let i = 1; i <= pdf.numPages; i++) {
-      const holder = document.createElement("div");
-      holder.className = "page";
-      holder.dataset.page = i;
-      holder.style.aspectRatio = "1 / " + ratio;
-      const loading = document.createElement("div");
-      loading.className = "loading";
-      loading.textContent = "Page " + i;
-      holder.appendChild(loading);
-      viewerBody.appendChild(holder);
-      pageObserver.observe(holder);
-    }
-  } catch (error) {
-    console.error(error);
-    viewerInfo.textContent = "Aperçu impossible. Utilise le bouton Télécharger.";
-  }
-}
-
-async function renderPage(pdf, holder) {
-  try {
-    const page = await pdf.getPage(Number(holder.dataset.page));
-    const base = page.getViewport({ scale:1 });
-    const cssWidth = Math.min(holder.clientWidth || 800, 900);
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const viewport = page.getViewport({ scale:(cssWidth * dpr) / base.width });
-    const canvas = document.createElement("canvas");
-    canvas.width = viewport.width;
-    canvas.height = viewport.height;
-    await page.render({ canvasContext:canvas.getContext("2d"), viewport }).promise;
-    holder.style.aspectRatio = canvas.width + " / " + canvas.height;
-    holder.replaceChildren(canvas);
-  } catch (error) {
-    console.warn("Page non affichée", error);
-  }
-}
-
-function closeViewer() {
-  if (!viewerOpen) return;
-  viewerOpen = false;
-  if (pageObserver) pageObserver.disconnect();
-  viewer.classList.remove("open");
-  viewer.setAttribute("aria-hidden", "true");
-  document.body.classList.remove("locked");
-  viewerBody.replaceChildren();
-}
-
-viewerClose.addEventListener("click", () => {
-  if (history.state && history.state.viewer) history.back();
-  else closeViewer();
+function leave(){session=null;profile=null;entered=null;recovering=false;documents=[];exams=[];
+ ['loginForm','signupForm','profileForm','recoveryForm'].forEach(id=>$(id).reset());
+ ['authMsg','profMsg','rcMsg'].forEach(id=>say($(id),''));paintHeader();view('home');}
+sb.auth.onAuthStateChange((event,sess)=>{
+ if(event==='PASSWORD_RECOVERY'){recovering=true;session=sess;setTimeout(()=>view('recovery'),0);return;}
+ if(event==='SIGNED_OUT'){setTimeout(leave,0);return;}
+ if(sess&&(event==='SIGNED_IN'||event==='INITIAL_SESSION')){if(entered===sess.user.id)return;setTimeout(()=>enter(sess),0);}
 });
-window.addEventListener("popstate", closeViewer);
-document.addEventListener("keydown", e => {
-  if (e.key === "Escape" && viewerOpen) viewerClose.click();
-});
-
-/* ---------- Cartes de documents ---------- */
-function createCard(doc, isExam = false) {
-  const card = document.createElement("article");
-  card.className = "document";
-
-  const cover = document.createElement("div");
-  cover.className = "cover";
-  cover.dataset.url = doc.url || "";
-  cover.dataset.cover = doc.cover || "";
-
-  const placeholder = document.createElement("div");
-  placeholder.className = "ph";
-  placeholder.textContent = isExam ? "📝" : "📘";
-  cover.appendChild(placeholder);
-
-  if (doc.url) {
-    cover.addEventListener("click", () => openViewer(doc));
-    if (coverObserver) coverObserver.observe(cover);
-    else loadCover(cover);
-  }
-
-  const title = document.createElement("h3");
-  title.textContent = doc.titre;
-
-  const meta = document.createElement("div");
-  meta.className = "meta";
-  meta.textContent = (doc.matiere || "Matière non précisée") + " · Série " +
-    (doc.serie || "non précisée") + " · " + (doc.annee || "année non précisée");
-
-  const description = document.createElement("p");
-  description.className = "description";
-  description.textContent = doc.description || (isExam
-    ? "Sujet du BAC 2."
-    : "Document de révision.");
-
-  card.append(cover, title, meta, description);
-
-  if (isExam) {
-    const badge = document.createElement("span");
-    badge.className = "exam-badge";
-    badge.textContent = "Épreuve du BAC 2";
-    card.insertBefore(badge, cover);
-  }
-
-  if (doc.url) {
-    const actions = document.createElement("div");
-    actions.className = "actions";
-
-    const preview = document.createElement("button");
-    preview.type = "button";
-    preview.className = "btn btn-preview";
-    preview.textContent = "👁 Aperçu";
-    preview.addEventListener("click", () => openViewer(doc));
-
-    const link = document.createElement("a");
-    link.className = "btn download";
-    link.href = downloadUrl(doc.url, doc.titre);
-    link.textContent = "Télécharger";
-    link.target = "_blank";
-    link.rel = "noopener";
-
-    actions.append(preview, link);
-    card.appendChild(actions);
-  } else if (isExam) {
-    const unavailable = document.createElement("div");
-    unavailable.className = "exam-unavailable";
-    unavailable.textContent = "📄 PDF indisponible pour le moment. Le sujet sera ajouté dès que le fichier sera disponible.";
-    card.appendChild(unavailable);
-  }
-
-  return card;
-}
-
-function renderDocuments() {
-  const query = normalize(search.value);
-  const filtered = documents.filter(doc => {
-    const text = normalize([doc.titre, doc.matiere, doc.serie, doc.annee, doc.description].join(" "));
-    return (!query || text.includes(query)) &&
-      (!subject.value || doc.matiere === subject.value) &&
-      (!series.value || doc.serie === series.value) &&
-      (!year.value || String(doc.annee) === year.value);
-  });
-
-  count.textContent = filtered.length + (filtered.length > 1 ? " résultats" : " résultat");
-  results.replaceChildren();
-
-  if (!filtered.length) {
-    showEmpty(results, "Aucun document trouvé", "Essaie un autre mot ou retire un filtre.");
-    return;
-  }
-  filtered.forEach(doc => results.appendChild(createCard(doc)));
-}
-
-function renderExams() {
-  const query = normalize(search.value);
-  const selectedSeries = examSeries.value;
-  const selectedSubject = examSubject.value;
-  const selectedYear = examYear.value;
-
-  const filtered = exams.filter(doc => {
-    const text = normalize([doc.titre, doc.matiere, doc.serie, doc.annee, doc.description].join(" "));
-    return (!query || text.includes(query)) &&
-      (!selectedSeries || normalize(doc.serie) === normalize(selectedSeries)) &&
-      (!selectedSubject || doc.matiere === selectedSubject) &&
-      (!selectedYear || String(doc.annee) === selectedYear);
-  });
-
-  examCount.textContent = filtered.length + (filtered.length > 1 ? " épreuves" : " épreuve");
-  examResults.replaceChildren();
-
-  if (!filtered.length) {
-    showEmpty(examResults, "Aucune épreuve trouvée",
-      "Aucun sujet ne correspond aux filtres. Les épreuves seront ajoutées progressivement.");
-    return;
-  }
-  filtered.forEach(doc => examResults.appendChild(createCard(doc, true)));
-}
-
-[search, subject, series, year].forEach(element => {
-  element.addEventListener("input", renderDocuments);
-  element.addEventListener("change", renderDocuments);
-});
-[search, examSeries, examSubject, examYear].forEach(element => {
-  element.addEventListener("input", renderExams);
-  element.addEventListener("change", renderExams);
-});
-
-$("currentYear").textContent = new Date().getFullYear();
-
-loadDocuments();
-loadExams();
+function tab(mode){const login=mode==='login';$('tabLogin').classList.toggle('active',login);$('tabSignup').classList.toggle('active',!login);$('loginForm').classList.toggle('hidden',!login);$('signupForm').classList.toggle('hidden',login);say($('authMsg'),'');}
+$('tabLogin').addEventListener('click',()=>tab('login'));$('tabSignup').addEventListener('click',()=>tab('signup'));
+$('loginForm').addEventListener('submit',async e=>{e.preventDefault();const b=$('loginForm').querySelector('button[type=submit]');say($('authMsg'),'');b.disabled=true;
+ const {error}=await sb.auth.signInWithPassword({email:$('liEmail').value.trim(),password:$('liPass').value});b.disabled=false;if(error)say($('authMsg'),frErr(error));});
+$('signupForm').addEventListener('submit',async e=>{e.preventDefault();const b=$('signupForm').querySelector('button[type=submit]');say($('authMsg'),'');
+ if(!$('suConsent').checked){say($('authMsg'),'Coche la case d’acceptation pour continuer.');return;}
+ b.disabled=true;
+ const {data,error}=await sb.auth.signUp({email:$('suEmail').value.trim(),password:$('suPass').value,options:{emailRedirectTo:SITE_URL,data:{nom:$('suNom').value.trim(),prenom:$('suPrenom').value.trim(),classe:$('suClasse').value.trim(),etablissement:$('suEtab').value.trim()}}});
+ b.disabled=false;
+ if(error){say($('authMsg'),frErr(error));return;}
+ if(data&&data.user&&data.user.identities&&data.user.identities.length===0){say($('authMsg'),'Cette adresse e-mail est déjà inscrite. Connecte-toi.');return;}
+ if(!data.session)say($('authMsg'),'Compte créé. Vérifie ta boîte e-mail (et les spams) pour confirmer ton adresse, puis connecte-toi.',true);});
+$('forgotBtn').addEventListener('click',async()=>{const email=$('liEmail').value.trim();if(!email){say($('authMsg'),'Saisis d’abord ton e-mail dans le champ ci-dessus.');return;}
+ const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:SITE_URL});say($('authMsg'),error?frErr(error):'Si ce compte existe, un e-mail de réinitialisation vient d’être envoyé.',!error);});
+$('recoveryForm').addEventListener('submit',async e=>{e.preventDefault();const p=$('rcPass').value;
+ if(p!==$('rcPass2').value){say($('rcMsg'),'Les deux mots de passe ne sont pas identiques.');return;}
+ const {error}=await sb.auth.updateUser({password:p});if(error){say($('rcMsg'),frErr(error));return;}
+ recovering=false;$('recoveryForm').reset();say($('rcMsg'),'');goHome();});
+$('profileForm').addEventListener('submit',async e=>{e.preventDefault();if(!session)return;const b=$('profileForm').querySelector('button[type=submit]');say($('profMsg'),'');b.disabled=true;
+ const f={nom:$('pfNom').value.trim(),prenom:$('pfPrenom').value.trim(),classe:$('pfClasse').value.trim(),etablissement:$('pfEtab').value.trim()};
+ const {data,error}=await sb.from('profiles').update(f).eq('id',session.user.id).select().maybeSingle();b.disabled=false;
+ if(error||!data){say($('profMsg'),error?frErr(error):'Enregistrement impossible. Réessaie.');return;}
+ profile=data;paintHeader();say($('profMsg'),'Profil enregistré.',true);if(profileOk())setTimeout(()=>view('choice'),600);});
+$('headerLogin').addEventListener('click',()=>{if(session)sb.auth.signOut();else $('authCard').scrollIntoView({behavior:'smooth',block:'center'});});
+$('profileBtn').addEventListener('click',()=>{if(session){fillProfileForm();say($('profMsg'),'');view('profile');}});
+$('homeBtn').addEventListener('click',goHome);
+document.querySelectorAll('[data-open]').forEach(b=>b.addEventListener('click',()=>showApp(b.dataset.open)));
+document.querySelectorAll('[data-home]').forEach(b=>b.addEventListener('click',goHome));
+['annSearch','annSubject','annSeries','annYear'].forEach(id=>$(id).addEventListener('input',renderAnnales));
+['examSearch','examSeries','examSubject','examYear'].forEach(id=>$(id).addEventListener('input',renderExams));
+$('currentYear').textContent=new Date().getFullYear();
 </script>
-</body>
-</html>
+</body></html>
